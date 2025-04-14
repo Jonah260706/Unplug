@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNPLUG | Startup Launchpad</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.3/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6d28d9', // Purple
+                        secondary: '#10b981', // Emerald
+                        dark: '#111827', // Dark gray/black
+                        darker: '#0f172a', // Darker gray/black
+                        light: '#f8fafc',
+                        accent: '#f472b6' // Pink accent
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        html {
+            scroll-behavior: smooth;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        body {
+            background-color: #111827;
+            color: #f8fafc;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #6d28d9 0%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0f172a;
+            mix-blend-mode: overlay;
+            z-index: 0;
+        }
+        
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 43% 57% 70% 30% / 38% 45% 55% 62%;
+            background: rgba(109, 40, 217, 0.2);
+            animation: blob 15s linear infinite;
+            z-index: 0;
+        }
+        
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(16, 185, 129, 0.2);
+            animation-delay: -5s;
+        }
+        
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: rgba(244, 114, 182, 0.15);
+            animation-delay: -10s;
+            right: 10%;
+            top: 20%;
+        }
+        
+        @keyframes blob {
+            0% { transform: rotate(0deg) translate(10px) rotate(0deg) scale(1); }
+            33% { transform: rotate(120deg) translate(20px) rotate(-120deg) scale(1.1); }
+            66% { transform: rotate(240deg) translate(10px) rotate(-240deg) scale(0.9); }
+            100% { transform: rotate(360deg) translate(10px) rotate(-360deg) scale(1); }
+        }
+        
+        .slide-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .slide-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border-color: rgba(109, 40, 217, 0.5);
+        }
+        
+        .glass-card {
+            background: rgba(14, 24, 87, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 5px rgba(109, 40, 217, 0.5), 0 0 20px rgba(109, 40, 217, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6d28d9 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #4c1d95;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6d28d9;
+        }
+        
+        /* Perspective cards */
+        .perspective-card {
+            transition: transform 0.5s ease;
+            perspective: 1000px;
+        }
+        
+        .perspective-card:hover {
+            transform: rotateY(5deg) rotateX(5deg);
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <!-- Navigation -->
+    <nav x-data="{ open: false }" class="bg-black opacity-90  fixed w-full z-50 shadow-lg border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold"><span class="text-primary">UN</span><span class="text-white">PLUG</span></span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#about" class="hover:bg-purple-600 rounded-xl border-transparent text-gray-300 hover:border-primary hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-300">About</a>
+                        <a href="#features" class=" hover:bg-purple-600 rounded-xl border-transparent text-gray-300 hover:border-primary hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-300">Features</a>
+                        <a href="#speakers" class=" hover:bg-purple-600 rounded-xl border-transparent text-gray-300 hover:border-primary hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-300">Speakers</a>
+                        <a href="#success" class="hover:bg-purple-600 rounded-xl border-transparent text-gray-300 hover:border-primary hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-300">Success Stories</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="#register" class="bg-primary hover:bg-purple-800 text-white px-6 py-2 rounded-md text-sm font-medium transition duration-300 shadow-lg shadow-primary/20">Register Now</a>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button @click="open = !open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div x-show="open" class="sm:hidden bg-darker">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="#about" class="text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
+                <a href="#features" class="text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Features</a>
+                <a href="#speakers" class="text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Speakers</a>
+                <a href="#success" class="text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Success Stories</a>
+                <a href="#register" class="bg-primary text-white block px-3 py-2 rounded-md text-base font-medium my-2 mx-3">Register Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white pt-28 pb-20 md:pt-36 md:pb-28 relative overflow-hidden grid-pattern">
+        <div class="blob top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="blob blob-2 bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2"></div>
+        <div class="blob blob-3"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="md:flex items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Launch Your Startup <br><span class="text-green-300">with <span class="gradient-text">Unplug</span></span></h1>
+                    <p class="text-lg md:text-xl mb-8 max-w-lg text-gray-200">Where innovation meets opportunity. Join our premium startup launchpad designed to turn your ideas into thriving businesses.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#register" class="bg-primary hover:bg-purple-800 text-white font-medium rounded-md px-6 py-3 transition duration-300 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">Register Now</a>
+                        <a href="#about" class="bg-transparent border border-white/30 text-white hover:border-white hover:bg-white/5 font-medium rounded-md px-6 py-3 transition duration-300">Learn More</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 perspective-card">
+                    <div class="relative">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-30"></div>
+                        <img src="images\th (1).jpg" alt="Unplug Startup Launchpad" class="w-full rounded-xl shadow-2xl relative">
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap justify-between items-center mt-16 border-t border-white/10 pt-8">
+                <div class="text-center px-4 mb-6 md:mb-0">
+                    <h3 class="text-3xl font-bold gradient-text">150+</h3>
+                    <p class="text-gray-300">Startups Launched</p>
+                </div>
+                <div class="text-center px-4 mb-6 md:mb-0">
+                    <h3 class="text-3xl font-bold gradient-text">₹50Cr+</h3>
+                    <p class="text-gray-300">Funding Secured</p>
+                </div>
+                <div class="text-center px-4 mb-6 md:mb-0">
+                    <h3 class="text-3xl font-bold gradient-text">80+</h3>
+                    <p class="text-gray-300">Industry Mentors</p>
+                </div>
+                <div class="text-center px-4">
+                    <h3 class="text-3xl font-bold gradient-text">12</h3>
+                    <p class="text-gray-300">Years of Success</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 md:py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex items-center">
+                <div class="md:w-1/2 slide-up perspective-card">
+                    <div class="relative">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-30"></div>
+                        <img src="images\getty-googleplex-office.jpg" alt="Unplug Venue" class="w-full rounded-lg shadow-lg relative">
+                    </div>
+                </div>
+                <div class="md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-8 ml-10">
+                    <span class="text-primary font-semibold">Our Transformation</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">From Beach to Boardroom: <br>The <span class="gradient-text">Unplug</span> Evolution</h2>
+                    <p class="text-gray-300 mb-6">What began as a casual shark tank event by the beach has transformed into a premier startup launchpad. Unplug has evolved to provide entrepreneurs with a sophisticated urban venue equipped with cutting-edge resources and direct access to the investors and mentors who can turn visions into reality.</p>
+                    <p class="text-gray-300 mb-6">Our new venue in the heart of California's Google HeadQuarters which features state-of-the-art facilities, collaborative workspaces, and an environment designed to foster creativity and business growth.</p>
+                    <div class="flex flex-wrap gap-4 slide-up">
+                        <div class="flex items-center">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">500+ Seat Auditorium</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">20 Breakout Rooms</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">Innovation Lab</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">Networking Lounges</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 md:py-24 bg-dark grid-pattern bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold">What We Offer</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2">Launch Your <span class="gradient-text">Success Story</span></h2>
+                <p class="max-w-2xl mx-auto text-gray-300 mt-4">We provide everything entrepreneurs need to transform ideas into thriving businesses. Our comprehensive approach ensures startups have all the necessary resources to succeed.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Exclusive Networking</h3>
+                    <p class="text-gray-300">Connect with industry leaders, venture capitalists, and fellow entrepreneurs in our curated networking events designed to build meaningful business relationships.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Expert Mentorship</h3>
+                    <p class="text-gray-300">Gain personalized guidance from our network of industry experts who have successfully navigated the startup journey and can help you avoid common pitfalls.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Investor Access</h3>
+                    <p class="text-gray-300">Present your vision directly to a curated group of angel investors, VCs, and funding partners actively seeking promising startups to support.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Startup Workshops</h3>
+                    <p class="text-gray-300">Participate in targeted skill-building sessions covering everything from business model validation to marketing strategy and financial planning.</p>
+                </div>
+                <!-- Feature 5 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Market Exposure</h3>
+                    <p class="text-gray-300">Gain visibility through our media partnerships, demo days, and showcase opportunities that put your startup in front of customers and industry press.</p>
+                </div>
+                <!-- Feature 6 -->
+                <div class="bg-blue-950 p-6 rounded-lg shadow-lg card-hover slide-up border border-white/5">
+                    <div class="bg-primary/20 w-12 h-12 flex items-center justify-center rounded-lg mb-4 border border-primary/30">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Resource Access</h3>
+                    <p class="text-gray-300">Access our suite of startup resources, including legal templates, pitch deck frameworks, and cloud credits from our technology partners.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Speakers Section -->
+    <section id="speakers" class="py-16 md:py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold">Top Industry Leaders</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2">Meet Our <span class="gradient-text">Speakers & Mentors</span></h2>
+                <p class="max-w-2xl mx-auto text-gray-300 mt-4">Learn from the best minds in tech and business who have built successful companies and are ready to share their insights.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Speaker 1 -->
+                <div class="glass-card p-6 rounded-lg slide-up">
+                    <h3 class="text-xl font-bold text-white">XYZ</h3>
+                    <p class="text-primary font-medium">CEO, XYZ</p>
+                    <p class="text-gray-300 mt-2">Serial entrepreneur with 3 successful exits and expert in SaaS scaling strategies.</p>
+                    <div class="flex mt-4 space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <!-- Speaker 2 -->
+                <div class="glass-card p-6 rounded-lg slide-up">
+                    <h3 class="text-xl font-bold text-white">XYZ</h3>
+                    <p class="text-primary font-medium">Partner, XYZ</p>
+                    <p class="text-gray-300 mt-2">Leading VC investor with portfolio companies valued at over $2B collectively.</p>
+                    <div class="flex mt-4 space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <!-- Speaker 3 -->
+                <div class="glass-card p-6 rounded-lg slide-up">
+                    <h3 class="text-xl font-bold text-white">XYZ</h3>
+                    <p class="text-primary font-medium">CMO, XYZ</p>
+                    <p class="text-gray-300 mt-2">Marketing strategist who has helped startups achieve 10x growth in under 18 months.</p>
+                    <div class="flex mt-4 space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <!-- Speaker 4 -->
+                <div class="glass-card p-6 rounded-lg slide-up">
+                    <h3 class="text-xl font-bold text-white">XYZ</h3>
+                    <p class="text-primary font-medium">Founder, XYZ</p>
+                    <p class="text-gray-300 mt-2">AI innovator whose technology has been acquired by major tech companies twice.</p>
+                    <div class="flex mt-4 space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Success Stories Section -->
+    <section id="success" class="py-16 md:py-24 bg-dark grid-pattern bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold">Success Stories</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2">Startups That <span class="gradient-text">Made It Big</span></h2>
+                <p class="max-w-2xl mx-auto text-gray-300 mt-4">These companies launched with Unplug and went on to achieve remarkable growth and success.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Success Story 1 -->
+                <div class="glass-card p-6 rounded-lg card-hover slide-up">
+                    
+                    <h3 class="text-xl font-bold text-white">XXXX</h3>
+                    <p class="text-primary font-medium">AI Healthcare Solutions</p>
+                    <p class="text-gray-300 mt-2">Raised XXXX Series A after participating in Unplug 2025. Now serving over XXX hospitals nationwide.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-secondary hover:text-green-400 transition-colors">Read their story →</a>
+                    </div>
+                </div>
+                <!-- Success Story 2 -->
+                <div class="glass-card p-6 rounded-lg card-hover slide-up">
+                    
+                    <h3 class="text-xl font-bold text-white">XXX</h3>
+                    <p class="text-primary font-medium">Sustainable Investment Platform</p>
+                    <p class="text-gray-300 mt-2">Acquired for XXXX just XXX months after launching at Unplug with their innovative XXX investing platform.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-secondary hover:text-green-400 transition-colors">Read their story →</a>
+                    </div>
+                </div>
+                <!-- Success Story 3 -->
+                <div class="glass-card p-6 rounded-lg card-hover slide-up">
+                    
+                    <h3 class="text-xl font-bold text-white">XXXX</h3>
+                    <p class="text-primary font-medium">Last-Mile Delivery Tech</p>
+                    <p class="text-gray-300 mt-2">Scaled to operations in XXX cities with XXXX funding after participating in Unplug.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-secondary hover:text-green-400 transition-colors">Read their story →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <!-- Registration Section -->
+    <section id="register" class="py-16 md:py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-8">
+                    <span class="text-primary font-semibold">Join Us Today</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2">Ready to <span class="gradient-text">Launch Your Startup?</span></h2>
+                    <p class="text-gray-300 mt-4 mb-6">Register now to access our exclusive events, mentorship opportunities, and investor network. Limited spots are available for each cohort.</p>
+                    <div class="glass-card p-6 rounded-lg mb-6 border border-white/10">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-white font-medium">Access to all Unplug events for 12 months</span>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-white font-medium">One-on-one mentorship with industry experts</span>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-white font-medium">Demo day participation opportunities</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-primary/20 p-2 rounded-full mr-3 border border-primary/30">
+                                <svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-white font-medium">₹5,00,000 in partner credits and perks</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="glass-card p-8 rounded-lg border border-white/10 neon-border">
+                        <h3 class="text-2xl font-bold mb-6 text-white">Apply Now</h3>
+                        <form id="applicationForm">
+                            <div class="mb-4" >
+                                <label class="block text-gray-300 mb-2">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" class="w-full px-4 py-3 rounded-md bg-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                            <div class="mb-4" >
+                                <label class="block text-gray-300 mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 rounded-md bg-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-300 mb-2">Company / Startup Name</label>
+                                <input type="text" id="companyName" name="companyName" class="w-full px-4 py-3 rounded-md bg-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                            <div class="mb-6" >
+                                <label class="block text-gray-300 mb-2">Tell us about your startup</label>
+                                <textarea rows="4" id="description" name="description" class="w-full px-4 py-3 rounded-md bg-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                            </div>
+                            <button type="submit" id="submitButton" class="w-full bg-slate-950 hover:bg-purple-800 text-white font-medium py-3 px-4 rounded-md transition duration-300 shadow-lg shadow-primary/20">Submit Application</button>
+                        </form>
+                    
+                        <div id="successMessage" style="display:none; color:green; margin-top:15px;">
+                            Application submitted successfully!
+                        </div>
+                        <div id="errorMessage" style="display:none; color:red; margin-top:15px;">
+                            Error submitting application. Please try again.
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-950 py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-1">
+                    <span class="text-2xl font-bold"><span class="text-primary">UN</span><span class="text-white">PLUG</span></span>
+                    <p class="text-gray-400 mt-4">Transforming innovative ideas into thriving businesses through mentorship, resources, and investor connections.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Programs</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Accelerator</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Mentorship</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Investor Connect</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Workshops</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="text-gray-400"><i class="fas fa-map-marker-alt text-primary mr-2"></i>xxxxxxx</li>
+                        <li class="text-gray-400"><i class="fas fa-envelope text-primary mr-2"></i> xxxx@xxxx.com</li>
+                        <li class="text-gray-400"><i class="fas fa-phone text-primary mr-2"></i> xxxxxx</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">&copy; 2025 Unplug. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors text-sm">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors text-sm">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+</html>
