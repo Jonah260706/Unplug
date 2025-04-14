@@ -65,7 +65,7 @@ document.getElementById('applicationForm').addEventListener('submit', async func
         
         console.log('Sending form data:', formData);
         
-        const response = await fetch('http://localhost:3000/api/submit-application', {
+        const response = await fetch('/api/submit-application', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
